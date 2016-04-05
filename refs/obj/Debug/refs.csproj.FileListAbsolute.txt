@@ -1,0 +1,5 @@
+C:\Users\brandon\tech\sudoku_cracker\refs\bin\Debug\Refs.dll
+C:\Users\brandon\tech\sudoku_cracker\refs\bin\Debug\Refs.pdb
+C:\Users\brandon\tech\sudoku_cracker\refs\obj\Debug\refs.csprojResolveAssemblyReference.cache
+C:\Users\brandon\tech\sudoku_cracker\refs\obj\Debug\Refs.dll
+C:\Users\brandon\tech\sudoku_cracker\refs\obj\Debug\Refs.pdb
