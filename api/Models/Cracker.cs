@@ -68,6 +68,13 @@ namespace Api.Models
                             throw new ArgumentOutOfRangeException($"{cell.Value} is not a recognized value. Only values 1 - 9 are allowed");
                         }
                     }
+
+                    if (cell.Row < 0 || cell.Row > 8 || cell.Column < 0 || cell.Column > 8)
+                    {
+                        throw new ArgumentOutOfRangeException($"coordinates {cell.Row}, {cell.Column} are invalid");
+                    }
+
+                    cell.Box = GetBox(r, c);
                 }
             }
 
@@ -85,10 +92,41 @@ namespace Api.Models
                 return 1;
             }
 
-            if (row <= 2 && column <= 8)
+            // no need to check the column on this, it would just be in the last box
+            if (row <= 2)
             {
                 return 2;
             }
+
+            if (row <= 5 && column <= 2)
+            {
+                return 3;
+            }
+
+            if (row <= 5 && column <= 5)
+            {
+                return 4;
+            }
+
+            // no need to check the column on this, it would just be in the last box
+            if (row <= 5)
+            {
+                return 5;
+            }
+
+            // no longer need to check the row
+            if (column <= 2)
+            {
+                return 6;
+            }
+
+            if (column <= 5)
+            {
+                return 7;
+            }
+
+            // last box
+            return 8;
         }
 
     }
