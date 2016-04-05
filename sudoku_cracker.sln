@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Api", "api\Api.csproj", "{A3429140-B38D-481F-B0FC-FF198DA534D2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Refs", "refs\Refs.csproj", "{4387FC19-1E73-46DF-B100-4A1BF302EAFC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wpf", "Wpf\Wpf.csproj", "{F3B1F4FE-E203-4B68-B729-8C467711A08D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{4387FC19-1E73-46DF-B100-4A1BF302EAFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4387FC19-1E73-46DF-B100-4A1BF302EAFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4387FC19-1E73-46DF-B100-4A1BF302EAFC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3B1F4FE-E203-4B68-B729-8C467711A08D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3B1F4FE-E203-4B68-B729-8C467711A08D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3B1F4FE-E203-4B68-B729-8C467711A08D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3B1F4FE-E203-4B68-B729-8C467711A08D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
