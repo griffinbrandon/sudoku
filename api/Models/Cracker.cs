@@ -9,6 +9,8 @@ namespace Api.Models
     public class Cracker
     {
         private List<Cell> _grid;
+        private readonly int[] _range = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        private Dictionary<int, List<List<int>>> _rowPossibilities = new Dictionary<int, List<List<int>>>();
 
         public Cracker(List<ICell> grid)
         {
@@ -21,12 +23,63 @@ namespace Api.Models
             PrepareCells();
 
             // find all the values each cell can possibly be
-            DeterminePossibles();
+            DeterminePossiblesPerCell();
+
+            // find all possibilities for each row
+            DetermineRowPossibilities();
+
+            FindSolution();
 
             return null;
         }
 
-        private void DeterminePossibles()
+        private void DetermineRowPossibilities()
+        {
+            for (var i = 0; i < 9; i++)
+            {
+                var row = this._grid.Where(x => x.Row == i).OrderBy(x => x.Column);
+
+                var possibles = new List<string>();
+
+                foreach (var value in row.First().PossibleValues)
+                {
+                    possibles.Add(value.ToString());
+                }
+
+                foreach (var cell in row.Skip(1))
+                {
+                    var tmp = new List<string>();
+
+                    foreach (var value in cell.PossibleValues)
+                    {
+                        foreach (var possible in possibles)
+                        {
+                            tmp.Add($"{possible},{value}");
+                        }
+
+                        possibles = tmp;
+                    }
+                }
+
+                var rowPossibles = new List<List<int>>();
+                foreach (var p in possibles)
+                {
+                    var arr = p.Split(',').Select(x => int.Parse(x)).ToList();
+
+                    // duplicate numbers in this make this no longer a possibility
+                    if (arr.Distinct().Count() != 9)
+                    {
+                        continue;
+                    }
+
+                    rowPossibles.Add(arr);
+                }
+
+                _rowPossibilities.Add(i, rowPossibles);
+            }
+        }
+
+        private void DeterminePossiblesPerCell()
         {
             foreach (var cell in this._grid)
             {
@@ -36,8 +89,27 @@ namespace Api.Models
                     continue;
                 }
 
+                // get values from cells in same row
+                var inRow = this._grid.Where(x => x.Row == cell.Row && x.Id != cell.Id).Select(x => x.Value);
 
+                // get values from cells in same column
+                var inCol = this._grid.Where(x => x.Column == cell.Column && x.Id != cell.Id).Select(x => x.Value);
+
+                // get values from cells in same box
+                var inBox = this._grid.Where(x => x.Box == cell.Box && x.Id != cell.Id).Select(x => x.Value);
+
+                // get a distinct list of numbers that are already used
+                var reservedValues = (inRow.Union(inCol).Union(inBox)).Distinct();
+
+                // using the distinct list, get values this cell could be
+                var possibles = _range.Where(x => !reservedValues.Contains(x)).ToList();
+                cell.PossibleValues = possibles;
             }
+        }
+
+        private List<ICell> FindSolution()
+        {
+            return null;
         }
 
         private void PrepareCells()
