@@ -11,6 +11,5 @@ namespace refs
         int Row { get; set; }
         int Column { get; set; }
         int? Value { get; set; }
-        bool ReadOnly { get; set; }
     }
 }
