@@ -47,7 +47,7 @@ namespace Api.Models
                 {
                     possibles.Add(value.ToString());
                 }
-
+                
                 // loop through all cells after the first one
                 foreach (var cell in row.Skip(1))
                 {
@@ -55,7 +55,8 @@ namespace Api.Models
 
                     // loop through possible values for the cell
                     foreach (var value in cell.PossibleValues)
-                    {
+                    {                        
+
                         // append each of these cells possible values onto the already possible values
                         foreach (var possible in possibles)
                         {
@@ -63,7 +64,7 @@ namespace Api.Models
                         }
 
                         // set row possibles to the possibles with this cell
-                        possibles = tmp;
+                        possibles = tmp.Select(x => x).ToList(); // this makes a copy
                     }
                 }
 
@@ -234,7 +235,7 @@ namespace Api.Models
         {
             for (var r = 0; r < 9; r++)
             {
-                var rows = this._grid.Where(x => x.Row == 0);
+                var rows = this._grid.Where(x => x.Row == r);
 
                 for (var c = 0; c < 9; c++)
                 {
@@ -242,8 +243,10 @@ namespace Api.Models
 
                     if (cell == null)
                     {
+                        cell = new Cell(r, c);
+
                         // add the cell to the collection
-                        this._grid.Add(new Cell(r, c));
+                        this._grid.Add(cell);
                     }
 
                     if (cell.Value.HasValue)

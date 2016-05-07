@@ -11,7 +11,9 @@ namespace NUnit.Sudoku
     {
         public Cell(int row, int column, int? value = null)
         {
-
+            this.Row = row;
+            this.Column = column;
+            this.Value = value;
         }
 
         public int Column { get; set; }           
