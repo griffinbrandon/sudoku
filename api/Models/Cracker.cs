@@ -10,7 +10,7 @@ namespace Api.Models
     {
         private List<Cell> _grid;
         private readonly int[] _range = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-        private Dictionary<int, List<List<int>>> _rowPossibilities = new Dictionary<int, List<List<Cell>>>();
+        private Dictionary<int, List<List<int>>> _rowPossibilities = new Dictionary<int, List<List<int>>>();
 
         public Cracker(List<ICell> grid)
         {
