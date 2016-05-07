@@ -10,7 +10,7 @@ namespace Api.Models
     {
         private List<Cell> _grid;
         private readonly int[] _range = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-        private Dictionary<int, List<List<int>>> _rowPossibilities = new Dictionary<int, List<List<int>>>();
+        private Dictionary<int, List<string>> _rowPossibilities = new Dictionary<int, List<string>>();
 
         public Cracker(List<ICell> grid)
         {
@@ -68,24 +68,7 @@ namespace Api.Models
                     }
                 }
 
-                var rowPossibles = new List<List<int>>();
-                // loop through all row possibles
-                foreach (var p in possibles)
-                {
-                    var arr = p.Split(',').Select(x => int.Parse(x)).ToList();
-
-                    // duplicate numbers in this make this no longer a possibility
-                    if (arr.Distinct().Count() != 9)
-                    {
-                        continue;
-                    }
-
-                    // add distinct possibles
-                    rowPossibles.Add(arr);
-                }
-
-                // add all of the possibles using the row as the key
-                _rowPossibilities.Add(i, rowPossibles);
+                _rowPossibilities.Add(i, possibles);
             }
         }
 
@@ -122,53 +105,40 @@ namespace Api.Models
             // loop through row one
             foreach (var row1Possible in _rowPossibilities[0])
             {
-                var row1 = GetRow(row1Possible, 0);
-
                 // row two
                 foreach (var row2Possible in _rowPossibilities[1])
                 {
-                    var row2 = GetRow(row2Possible, 1);
-
                     // row three
                     foreach (var row3Possible in _rowPossibilities[2])
                     {
-                        var row3 = GetRow(row3Possible, 2);
-
                         // row four
                         foreach (var row4Possible in _rowPossibilities[3])
                         {
-                            var row4 = GetRow(row4Possible, 3);
-
                             // row five
                             foreach (var row5Possible in _rowPossibilities[4])
                             {
-                                var row5 = GetRow(row5Possible, 4);
-
                                 // row six
                                 foreach (var row6Possible in _rowPossibilities[5])
-                                {
-                                    var row6 = GetRow(row6Possible, 5);
-
+                                {                                    
                                     // row seven
                                     foreach (var row7Possible in _rowPossibilities[6])
                                     {
-                                        var row7 = GetRow(row7Possible, 6);
-
                                         // row eight
                                         foreach (var row8Possible in _rowPossibilities[7])
                                         {
-                                            var row8 = GetRow(row8Possible, 7);
-
                                             // row nine
                                             foreach (var row9Possible in _rowPossibilities[8])
                                             {
-                                                var row9 = GetRow(row9Possible, 8);
-
-                                                var grid = row1.Union(row2).Union(row3).Union(row4).Union(row5).Union(row6).Union(row7).Union(row8).Union(row9);
-
-                                                if (ValidatePossible(grid.ToList()))
+                                                var grid = new List<string[]>
                                                 {
-                                                    return grid.Select(x => (ICell)x).ToList();
+                                                    row1Possible.Split(','), row2Possible.Split(','), row3Possible.Split(','),
+                                                    row4Possible.Split(','), row5Possible.Split(','), row6Possible.Split(','),
+                                                    row7Possible.Split(','), row8Possible.Split(','), row9Possible.Split(',')
+                                                };
+
+                                                if (ValidatePossible(grid))
+                                                {
+                                                    return null;
                                                 }
                                             }
                                         }
@@ -183,46 +153,84 @@ namespace Api.Models
             return null;
         }
 
-        private IEnumerable<Cell> GetRow(List<int> rowPossibles, int rowInx)
+        //private IEnumerable<Cell> GetRow(string rowPossibles, int rowInx)
+        //{
+        //    return rowPossibles.Select(x => new Cell
+        //    {
+        //        Value = x,
+        //        Row = rowInx,
+        //        Column = rowPossibles.IndexOf(x),
+        //        Box = GetBox(rowInx, rowPossibles.IndexOf(x))
+        //    });
+        //}
+
+        private bool ValidatePossible(List<string[]> grid)
         {
-            return rowPossibles.Select(x => new Cell
+            // check each row
+            for (var r = 0; r < 9; r++)
             {
-                Value = x,
-                Row = rowInx,
-                Column = rowPossibles.IndexOf(x),
-                Box = GetBox(rowInx, rowPossibles.IndexOf(x))
-            });
-        }
-
-        private bool ValidatePossible(List<Cell> grid)
-        {
-            // check the rows
-            for (var i = 0; i < 9; i++)
-            {
-                var row = grid.Where(x => x.Row == i);
-
-                // if all the values are distinct, the row is good
-                if (row.Select(x => x.Value).Distinct().Count() != 9) return false;
-
+                if (grid[r].Distinct().Count() != 9) return false;
             }
 
             // check the columns
-            for (var i = 0; i < 9; i++)
+            for (var c = 0; c < 9; c++)
             {
-                var column = grid.Where(x => x.Column == i);
+                var column = grid.SelectMany(x => x[c]);
 
                 // if all the values are distinct, the column is good
-                if (column.Select(x => x.Value).Distinct().Count() != 9) return false;
+                if (column.Distinct().Count() != 9) return false;
 
             }
 
-            // check the boxes
-            for (var i = 0; i < 9; i++)
+            // figure out boxes
+            var boxes = new string[] { "", "", "", "", "", "", "", "", "" };
+            for (var r = 0; r < 9; r++)
             {
-                var box = grid.Where(x => x.Box == i);
+                for (var c = 0; c < 9; c++)
+                {
+                    var box = 0;
+                    if (r > 5 && c < 3)
+                    {
+                        box = 6;
+                    }
+                    else if (r > 5 && c < 6)
+                    {
+                        box = 7;
+                    }
+                    else if (r > 5)
+                    {
+                        box = 8;
+                    }
+                    else if (r > 2 && c < 3)
+                    {
+                        box = 3;
+                    }
+                    else if (r > 2 && c < 6)
+                    {
+                        box = 4;
+                    }
+                    else if (r < 2)
+                    {
+                        box = 5;
+                    }
+                    else if (c > 5)
+                    {
+                        box = 2;
+                    }
+                    else if (c > 2)
+                    {
+                        box = 1;
+                    }
+                    
+                    boxes[box] += grid[r][c];
+                }
+            }
 
+            // check the boxes
+            for (var b = 0; b < 9; b++)
+            {
                 // if all the values are distinct, the column is good
-                if (box.Select(x => x.Value).Distinct().Count() != 9) return false;
+                if (boxes[b].Split(',').Distinct().Count() != 9) return false;
 
             }
 
