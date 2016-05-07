@@ -10,7 +10,7 @@ namespace Api.Models
     {
         private List<Cell> _grid;
         private readonly int[] _range = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-        private Dictionary<int, List<List<int>>> _rowPossibilities = new Dictionary<int, List<List<int>>>();
+        private Dictionary<int, List<List<int>>> _rowPossibilities = new Dictionary<int, List<List<Cell>>>();
 
         public Cracker(List<ICell> grid)
         {
@@ -28,40 +28,47 @@ namespace Api.Models
             // find all possibilities for each row
             DetermineRowPossibilities();
 
-            FindSolution();
+            var solution = FindSolution();
 
-            return null;
+            return solution;
         }
 
         private void DetermineRowPossibilities()
         {
+            // loop through each row
             for (var i = 0; i < 9; i++)
             {
                 var row = this._grid.Where(x => x.Row == i).OrderBy(x => x.Column);
 
                 var possibles = new List<string>();
 
+                // add the possible values from the first cell
                 foreach (var value in row.First().PossibleValues)
                 {
                     possibles.Add(value.ToString());
                 }
 
+                // loop through all cells after the first one
                 foreach (var cell in row.Skip(1))
                 {
                     var tmp = new List<string>();
 
+                    // loop through possible values for the cell
                     foreach (var value in cell.PossibleValues)
                     {
+                        // append each of these cells possible values onto the already possible values
                         foreach (var possible in possibles)
                         {
                             tmp.Add($"{possible},{value}");
                         }
 
+                        // set row possibles to the possibles with this cell
                         possibles = tmp;
                     }
                 }
 
                 var rowPossibles = new List<List<int>>();
+                // loop through all row possibles
                 foreach (var p in possibles)
                 {
                     var arr = p.Split(',').Select(x => int.Parse(x)).ToList();
@@ -72,9 +79,11 @@ namespace Api.Models
                         continue;
                     }
 
+                    // add distinct possibles
                     rowPossibles.Add(arr);
                 }
 
+                // add all of the possibles using the row as the key
                 _rowPossibilities.Add(i, rowPossibles);
             }
         }
@@ -109,7 +118,116 @@ namespace Api.Models
 
         private List<ICell> FindSolution()
         {
+            // loop through row one
+            foreach (var row1Possible in _rowPossibilities[0])
+            {
+                var row1 = GetRow(row1Possible, 0);
+
+                // row two
+                foreach (var row2Possible in _rowPossibilities[1])
+                {
+                    var row2 = GetRow(row2Possible, 1);
+
+                    // row three
+                    foreach (var row3Possible in _rowPossibilities[2])
+                    {
+                        var row3 = GetRow(row3Possible, 2);
+
+                        // row four
+                        foreach (var row4Possible in _rowPossibilities[3])
+                        {
+                            var row4 = GetRow(row4Possible, 3);
+
+                            // row five
+                            foreach (var row5Possible in _rowPossibilities[4])
+                            {
+                                var row5 = GetRow(row5Possible, 4);
+
+                                // row six
+                                foreach (var row6Possible in _rowPossibilities[5])
+                                {
+                                    var row6 = GetRow(row6Possible, 5);
+
+                                    // row seven
+                                    foreach (var row7Possible in _rowPossibilities[6])
+                                    {
+                                        var row7 = GetRow(row7Possible, 6);
+
+                                        // row eight
+                                        foreach (var row8Possible in _rowPossibilities[7])
+                                        {
+                                            var row8 = GetRow(row8Possible, 7);
+
+                                            // row nine
+                                            foreach (var row9Possible in _rowPossibilities[8])
+                                            {
+                                                var row9 = GetRow(row9Possible, 8);
+
+                                                var grid = row1.Union(row2).Union(row3).Union(row4).Union(row5).Union(row6).Union(row7).Union(row8).Union(row9);
+
+                                                if (ValidatePossible(grid.ToList()))
+                                                {
+                                                    return grid.Select(x => (ICell)x).ToList();
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             return null;
+        }
+
+        private IEnumerable<Cell> GetRow(List<int> rowPossibles, int rowInx)
+        {
+            return rowPossibles.Select(x => new Cell
+            {
+                Value = x,
+                Row = rowInx,
+                Column = rowPossibles.IndexOf(x),
+                Box = GetBox(rowInx, rowPossibles.IndexOf(x))
+            });
+        }
+
+        private bool ValidatePossible(List<Cell> grid)
+        {
+            // check the rows
+            for (var i = 0; i < 9; i++)
+            {
+                var row = grid.Where(x => x.Row == i);
+
+                // if all the values are distinct, the row is good
+                if (row.Select(x => x.Value).Distinct().Count() != 9) return false;
+
+            }
+
+            // check the columns
+            for (var i = 0; i < 9; i++)
+            {
+                var column = grid.Where(x => x.Column == i);
+
+                // if all the values are distinct, the column is good
+                if (column.Select(x => x.Value).Distinct().Count() != 9) return false;
+
+            }
+
+            // check the boxes
+            for (var i = 0; i < 9; i++)
+            {
+                var box = grid.Where(x => x.Box == i);
+
+                // if all the values are distinct, the column is good
+                if (box.Select(x => x.Value).Distinct().Count() != 9) return false;
+
+            }
+
+            // this is the answer
+            return true;
+
         }
 
         private void PrepareCells()
