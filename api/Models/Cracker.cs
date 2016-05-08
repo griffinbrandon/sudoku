@@ -62,13 +62,30 @@ namespace Api.Models
                         {
                             tmp.Add($"{possible},{value}");
                         }
-
-                        // set row possibles to the possibles with this cell
-                        possibles = tmp.Select(x => x).ToList(); // this makes a copy
                     }
+
+                    // set row possibles to the possibles with this cell
+                    possibles = tmp.Select(x => x).ToList(); // this makes a copy
                 }
 
-                _rowPossibilities.Add(i, possibles);
+                var rowPossibles = new List<string>();
+                // loop through all row possibles
+                foreach (var p in possibles)
+                {
+                    var arr = p.Split(',').ToList();
+
+                    // duplicate numbers in this make this no longer a possibility
+                    if (arr.Distinct().Count() != 9)
+                    {
+                        continue;
+                    }
+
+                    // add distinct possibles
+                    rowPossibles.Add(p);
+                }
+
+
+                _rowPossibilities.Add(i, rowPossibles);
             }
         }
 
@@ -138,7 +155,18 @@ namespace Api.Models
 
                                                 if (ValidatePossible(grid))
                                                 {
-                                                    return null;
+                                                    var finalGrid = GetRow(row1Possible, 0)
+                                                        .Union(GetRow(row2Possible, 1))
+                                                        .Union(GetRow(row3Possible, 2))
+                                                        .Union(GetRow(row4Possible, 3))
+                                                        .Union(GetRow(row5Possible, 4))
+                                                        .Union(GetRow(row6Possible, 5))
+                                                        .Union(GetRow(row7Possible, 6))
+                                                        .Union(GetRow(row8Possible, 7))
+                                                        .Union(GetRow(row9Possible, 8));
+
+                                                    return finalGrid.Select(x => (ICell)x).ToList();
+                                                        
                                                 }
                                             }
                                         }
@@ -153,16 +181,18 @@ namespace Api.Models
             return null;
         }
 
-        //private IEnumerable<Cell> GetRow(string rowPossibles, int rowInx)
-        //{
-        //    return rowPossibles.Select(x => new Cell
-        //    {
-        //        Value = x,
-        //        Row = rowInx,
-        //        Column = rowPossibles.IndexOf(x),
-        //        Box = GetBox(rowInx, rowPossibles.IndexOf(x))
-        //    });
-        //}
+        private IEnumerable<Cell> GetRow(string rowPossibles, int rowInx)
+        {
+            var values = rowPossibles.Split(',');
+
+            return values.Select(x => new Cell
+            {
+                Value = int.Parse(x),
+                Row = rowInx,
+                Column = Array.IndexOf(values, x),
+                Box = GetBox(rowInx, rowPossibles.IndexOf(x))
+            });
+        }
 
         private bool ValidatePossible(List<string[]> grid)
         {
@@ -188,41 +218,9 @@ namespace Api.Models
             {
                 for (var c = 0; c < 9; c++)
                 {
-                    var box = 0;
-                    if (r > 5 && c < 3)
-                    {
-                        box = 6;
-                    }
-                    else if (r > 5 && c < 6)
-                    {
-                        box = 7;
-                    }
-                    else if (r > 5)
-                    {
-                        box = 8;
-                    }
-                    else if (r > 2 && c < 3)
-                    {
-                        box = 3;
-                    }
-                    else if (r > 2 && c < 6)
-                    {
-                        box = 4;
-                    }
-                    else if (r < 2)
-                    {
-                        box = 5;
-                    }
-                    else if (c > 5)
-                    {
-                        box = 2;
-                    }
-                    else if (c > 2)
-                    {
-                        box = 1;
-                    }
+                    var box = GetBox(r, c);
                     
-                    boxes[box] += grid[r][c];
+                    boxes[box] += (string.IsNullOrEmpty(boxes[box]) ? grid[r][c] : $",{grid[r][c]}");
                 }
             }
 
