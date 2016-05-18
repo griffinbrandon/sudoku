@@ -118,148 +118,37 @@ namespace Api.Models
             }
         }
 
-        private List<ICell> FindSolution()
+        private List<string[]> CheckGrid(List<string[]> grid, int nextRowInx)
         {
-            var row1Count = _rowPossibilities[0].Count;
-            var row2Count = _rowPossibilities[1].Count;
-            var row3Count = _rowPossibilities[2].Count;
-            var row4Count = _rowPossibilities[3].Count;
-            var row5Count = _rowPossibilities[4].Count;
-            var row6Count = _rowPossibilities[5].Count;
-            var row7Count = _rowPossibilities[6].Count;
-            var row8Count = _rowPossibilities[7].Count;
-            var row9Count = _rowPossibilities[8].Count;
+            var rowCount = _rowPossibilities[nextRowInx].Count;
 
-            // loop through row one
-            for (var one = 0; one < row1Count; one++)
+            for (var p = 0; p < rowCount; p++)
             {
-                var row1Possible = _rowPossibilities[0][one];
+                var rowPossible = _rowPossibilities[nextRowInx][p];
 
-                // row two
-                for (var two = 0; two < row2Count; two++)
+                // add new row to grid passed in
+                var newGrid = grid.ToList();
+                newGrid.Add(rowPossible.Split(','));
+
+                // check if columns of grid contain distinct values
+                var isGood = ValidateColumns(newGrid);
+
+                if (isGood && nextRowInx < 8)
                 {
-                    var row2Possible = _rowPossibilities[1][two];
-
-                    var gridTwo = new List<string[]> { row1Possible.Split(','), row2Possible.Split(',') };
-
-                    if (!ValidateColumns(gridTwo))
+                    // grid is good so far, add the next row and see what happens
+                    var grd = CheckGrid(newGrid, nextRowInx + 1);
+                    if (grd != null)
                     {
-                        continue;
+                        return grd;
                     }
-
-                    // row three
-                    for (var three = 0; three < row3Count; three++)
+                }
+                else if (isGood && nextRowInx == 8)
+                {
+                    // make sure the boxes are correct
+                    if (ValidateBoxes(newGrid))
                     {
-                        var row3Possible = _rowPossibilities[2][three];
-
-                        var gridThree = gridTwo.ToList();
-                        gridThree.Add(row3Possible.Split(','));
-
-                        if (!ValidateColumns(gridThree))
-                        {
-                            continue;
-                        }
-
-                        // row four
-                        for (var four = 0; four < row4Count; four++)
-                        {
-                            var row4Possible = _rowPossibilities[3][four];
-
-                            var gridFour = gridThree.ToList();
-                            gridFour.Add(row4Possible.Split(','));
-
-                            if (!ValidateColumns(gridFour))
-                            {
-                                continue;
-                            }
-
-                            // row five
-                            for (var five = 0; five < row5Count; five++)
-                            {
-                                var row5Possible = _rowPossibilities[4][five];
-
-                                var gridFive = gridFour.ToList();
-                                gridFive.Add(row5Possible.Split(','));
-
-                                if (!ValidateColumns(gridFive))
-                                {
-                                    continue;
-                                }
-
-                                // row six
-                                for (var six = 0; six < row6Count; six++)
-                                {
-                                    var row6Possible = _rowPossibilities[5][six];
-
-                                    var gridSix = gridFive.ToList();
-                                    gridSix.Add(row6Possible.Split(','));
-
-                                    if (!ValidateColumns(gridSix))
-                                    {
-                                        continue;
-                                    }
-
-                                    // row seven
-                                    for (var seven = 0; seven < row7Count; seven++)
-                                    {
-                                        var row7Possible = _rowPossibilities[6][seven];
-
-                                        var gridSeven = gridSix.ToList();
-                                        gridSeven.Add(row7Possible.Split(','));
-
-                                        if (!ValidateColumns(gridSeven))
-                                        {
-                                            continue;
-                                        }
-
-                                        // row eight
-                                        for (var eight = 0; eight < row8Count; eight++)
-                                        {
-                                            var row8Possible = _rowPossibilities[7][eight];
-
-                                            var gridEight = gridSeven.ToList();
-                                            gridEight.Add(row8Possible.Split(','));
-
-                                            if (!ValidateColumns(gridEight))
-                                            {
-                                                continue;
-                                            }
-
-                                            // row nine
-                                            for (var nine = 0; nine < row9Count; nine++)
-                                            {
-                                                var row9Possible = _rowPossibilities[8][nine];
-
-                                                var gridNine = gridEight.ToList();
-                                                gridNine.Add(row9Possible.Split(','));
-
-                                                if (!ValidateColumns(gridNine))
-                                                {
-                                                    continue;
-                                                }
-
-                                                if (ValidateBoxes(gridNine))
-                                                {
-                                                    var finalGrid = GetRow(row1Possible, 0)
-                                                        .Union(GetRow(row2Possible, 1))
-                                                        .Union(GetRow(row3Possible, 2))
-                                                        .Union(GetRow(row4Possible, 3))
-                                                        .Union(GetRow(row5Possible, 4))
-                                                        .Union(GetRow(row6Possible, 5))
-                                                        .Union(GetRow(row7Possible, 6))
-                                                        .Union(GetRow(row8Possible, 7))
-                                                        .Union(GetRow(row9Possible, 8));
-
-                                                    return finalGrid.Select(x => (ICell)x).ToList();
-                                                        
-                                                }
-
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        // the answer
+                        return newGrid;
                     }
                 }
             }
@@ -267,16 +156,49 @@ namespace Api.Models
             return null;
         }
 
-        private IEnumerable<Cell> GetRow(string rowPossibles, int rowInx)
+        private List<ICell> FindSolution()
         {
-            var values = rowPossibles.Split(',');
+            var row1Count = _rowPossibilities[0].Count;
 
-            return values.Select(x => new Cell
+            // loop through row one
+            for (var one = 0; one < row1Count; one++)
+            {
+                var row1Possible = _rowPossibilities[0][one];
+                var grid = new List<string[]> { row1Possible.Split(',') };
+
+                var answer = CheckGrid(grid, 1);
+
+                if (answer != null)
+                {
+                    return BuildGrid(answer);
+                }
+            }
+
+            return null;
+        }
+
+        private List<ICell> BuildGrid(List<string[]> answer)
+        {
+            return (GetRow(answer[0], 0)
+                .Union(GetRow(answer[1], 1))
+                .Union(GetRow(answer[2], 2))
+                .Union(GetRow(answer[3], 3))
+                .Union(GetRow(answer[4], 4))
+                .Union(GetRow(answer[5], 5))
+                .Union(GetRow(answer[6], 6))
+                .Union(GetRow(answer[7], 7))
+                .Union(GetRow(answer[8], 8)))
+                .Select(x => (ICell)x).ToList();
+        }
+
+        private IEnumerable<Cell> GetRow(string[] rowPossibles, int rowInx)
+        {
+            return rowPossibles.Select(x => new Cell
             {
                 Value = int.Parse(x),
                 Row = rowInx,
-                Column = Array.IndexOf(values, x),
-                Box = GetBox(rowInx, Array.IndexOf(values, x))
+                Column = Array.IndexOf(rowPossibles, x),
+                Box = GetBox(rowInx, Array.IndexOf(rowPossibles, x))
             });
         }
 
