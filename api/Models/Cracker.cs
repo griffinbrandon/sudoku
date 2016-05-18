@@ -1,6 +1,7 @@
 ﻿using refs;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Web;
 
@@ -26,7 +27,7 @@ namespace Api.Models
             DeterminePossiblesPerCell();
 
             // find all possibilities for each row
-            DetermineRowPossibilities();
+            DetermineRowPossibilities();            
 
             var solution = FindSolution();
 
@@ -95,18 +96,18 @@ namespace Api.Models
             {
                 if (cell.Value.HasValue)
                 {
-                    cell.PossibleValues.Add(cell.Value.Value);
+                    cell.PossibleValues = new List<int> { cell.Value.Value };
                     continue;
                 }
 
                 // get values from cells in same row
-                var inRow = this._grid.Where(x => x.Row == cell.Row && x.Id != cell.Id).Select(x => x.Value);
+                var inRow = this._grid.Where(x => x.Row == cell.Row && x.Column != cell.Column).Select(x => x.Value);
 
                 // get values from cells in same column
-                var inCol = this._grid.Where(x => x.Column == cell.Column && x.Id != cell.Id).Select(x => x.Value);
+                var inCol = this._grid.Where(x => x.Column == cell.Column && x.Row != cell.Row).Select(x => x.Value);
 
                 // get values from cells in same box
-                var inBox = this._grid.Where(x => x.Box == cell.Box && x.Id != cell.Id).Select(x => x.Value);
+                var inBox = this._grid.Where(x => x.Box == cell.Box && x.Row != cell.Row && x.Column != cell.Column).Select(x => x.Value);
 
                 // get a distinct list of numbers that are already used
                 var reservedValues = (inRow.Union(inCol).Union(inBox)).Distinct();
@@ -119,41 +120,125 @@ namespace Api.Models
 
         private List<ICell> FindSolution()
         {
-            // loop through row one
-            foreach (var row1Possible in _rowPossibilities[0])
-            {
-                // row two
-                foreach (var row2Possible in _rowPossibilities[1])
-                {
-                    // row three
-                    foreach (var row3Possible in _rowPossibilities[2])
-                    {
-                        // row four
-                        foreach (var row4Possible in _rowPossibilities[3])
-                        {
-                            // row five
-                            foreach (var row5Possible in _rowPossibilities[4])
-                            {
-                                // row six
-                                foreach (var row6Possible in _rowPossibilities[5])
-                                {                                    
-                                    // row seven
-                                    foreach (var row7Possible in _rowPossibilities[6])
-                                    {
-                                        // row eight
-                                        foreach (var row8Possible in _rowPossibilities[7])
-                                        {
-                                            // row nine
-                                            foreach (var row9Possible in _rowPossibilities[8])
-                                            {
-                                                var grid = new List<string[]>
-                                                {
-                                                    row1Possible.Split(','), row2Possible.Split(','), row3Possible.Split(','),
-                                                    row4Possible.Split(','), row5Possible.Split(','), row6Possible.Split(','),
-                                                    row7Possible.Split(','), row8Possible.Split(','), row9Possible.Split(',')
-                                                };
+            var row1Count = _rowPossibilities[0].Count;
+            var row2Count = _rowPossibilities[1].Count;
+            var row3Count = _rowPossibilities[2].Count;
+            var row4Count = _rowPossibilities[3].Count;
+            var row5Count = _rowPossibilities[4].Count;
+            var row6Count = _rowPossibilities[5].Count;
+            var row7Count = _rowPossibilities[6].Count;
+            var row8Count = _rowPossibilities[7].Count;
+            var row9Count = _rowPossibilities[8].Count;
 
-                                                if (ValidatePossible(grid))
+            // loop through row one
+            for (var one = 0; one < row1Count; one++)
+            {
+                var row1Possible = _rowPossibilities[0][one];
+
+                // row two
+                for (var two = 0; two < row2Count; two++)
+                {
+                    var row2Possible = _rowPossibilities[1][two];
+
+                    var gridTwo = new List<string[]> { row1Possible.Split(','), row2Possible.Split(',') };
+
+                    if (!ValidateColumns(gridTwo))
+                    {
+                        continue;
+                    }
+
+                    // row three
+                    for (var three = 0; three < row3Count; three++)
+                    {
+                        var row3Possible = _rowPossibilities[2][three];
+
+                        var gridThree = gridTwo.ToList();
+                        gridThree.Add(row3Possible.Split(','));
+
+                        if (!ValidateColumns(gridThree))
+                        {
+                            continue;
+                        }
+
+                        // row four
+                        for (var four = 0; four < row4Count; four++)
+                        {
+                            var row4Possible = _rowPossibilities[3][four];
+
+                            var gridFour = gridThree.ToList();
+                            gridFour.Add(row4Possible.Split(','));
+
+                            if (!ValidateColumns(gridFour))
+                            {
+                                continue;
+                            }
+
+                            // row five
+                            for (var five = 0; five < row5Count; five++)
+                            {
+                                var row5Possible = _rowPossibilities[4][five];
+
+                                var gridFive = gridFour.ToList();
+                                gridFive.Add(row5Possible.Split(','));
+
+                                if (!ValidateColumns(gridFive))
+                                {
+                                    continue;
+                                }
+
+                                // row six
+                                for (var six = 0; six < row6Count; six++)
+                                {
+                                    var row6Possible = _rowPossibilities[5][six];
+
+                                    var gridSix = gridFive.ToList();
+                                    gridSix.Add(row6Possible.Split(','));
+
+                                    if (!ValidateColumns(gridSix))
+                                    {
+                                        continue;
+                                    }
+
+                                    // row seven
+                                    for (var seven = 0; seven < row7Count; seven++)
+                                    {
+                                        var row7Possible = _rowPossibilities[6][seven];
+
+                                        var gridSeven = gridSix.ToList();
+                                        gridSeven.Add(row7Possible.Split(','));
+
+                                        if (!ValidateColumns(gridSeven))
+                                        {
+                                            continue;
+                                        }
+
+                                        // row eight
+                                        for (var eight = 0; eight < row8Count; eight++)
+                                        {
+                                            var row8Possible = _rowPossibilities[7][eight];
+
+                                            var gridEight = gridSeven.ToList();
+                                            gridEight.Add(row8Possible.Split(','));
+
+                                            if (!ValidateColumns(gridEight))
+                                            {
+                                                continue;
+                                            }
+
+                                            // row nine
+                                            for (var nine = 0; nine < row9Count; nine++)
+                                            {
+                                                var row9Possible = _rowPossibilities[8][nine];
+
+                                                var gridNine = gridEight.ToList();
+                                                gridNine.Add(row9Possible.Split(','));
+
+                                                if (!ValidateColumns(gridNine))
+                                                {
+                                                    continue;
+                                                }
+
+                                                if (ValidateBoxes(gridNine))
                                                 {
                                                     var finalGrid = GetRow(row1Possible, 0)
                                                         .Union(GetRow(row2Possible, 1))
@@ -168,6 +253,7 @@ namespace Api.Models
                                                     return finalGrid.Select(x => (ICell)x).ToList();
                                                         
                                                 }
+
                                             }
                                         }
                                     }
@@ -190,17 +276,13 @@ namespace Api.Models
                 Value = int.Parse(x),
                 Row = rowInx,
                 Column = Array.IndexOf(values, x),
-                Box = GetBox(rowInx, rowPossibles.IndexOf(x))
+                Box = GetBox(rowInx, Array.IndexOf(values, x))
             });
         }
 
-        private bool ValidatePossible(List<string[]> grid)
+        private bool ValidateColumns(List<string[]> grid)
         {
-            // check each row
-            for (var r = 0; r < 9; r++)
-            {
-                if (grid[r].Distinct().Count() != 9) return false;
-            }
+            var distinct = grid.Count;
 
             // check the columns
             for (var c = 0; c < 9; c++)
@@ -208,10 +290,15 @@ namespace Api.Models
                 var column = grid.SelectMany(x => x[c]);
 
                 // if all the values are distinct, the column is good
-                if (column.Distinct().Count() != 9) return false;
+                if (column.Distinct().Count() != distinct) return false;
 
             }
 
+            return true;
+        }
+
+        private bool ValidateBoxes(List<string[]> grid)
+        {
             // figure out boxes
             var boxes = new string[] { "", "", "", "", "", "", "", "", "" };
             for (var r = 0; r < 9; r++)
@@ -253,19 +340,6 @@ namespace Api.Models
 
                         // add the cell to the collection
                         this._grid.Add(cell);
-                    }
-
-                    if (cell.Value.HasValue)
-                    {
-                        if (cell.Value >= 1 && cell.Value <= 9)
-                        {
-                            // set this to readonly because the value came from the user
-                            cell.ReadOnly = true;
-                        }
-                        else
-                        {
-                            throw new ArgumentOutOfRangeException($"{cell.Value} is not a recognized value. Only values 1 - 9 are allowed");
-                        }
                     }
 
                     if (cell.Row < 0 || cell.Row > 8 || cell.Column < 0 || cell.Column > 8)

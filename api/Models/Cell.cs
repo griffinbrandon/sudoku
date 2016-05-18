@@ -29,9 +29,7 @@ namespace Api.Models
         
         public int? Value { get; set; }
 
-        public List<int> PossibleValues { get; set; } = new List<int>();
-
-        internal Guid Id { get; private set; } = Guid.NewGuid();
+        public List<int> PossibleValues { get; set; }
 
     }
 }
