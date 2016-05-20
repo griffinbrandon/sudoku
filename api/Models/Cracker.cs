@@ -160,19 +160,10 @@ namespace Api.Models
         {
             var row1Count = _rowPossibilities[0].Count;
 
-            // loop through row one
-            for (var one = 0; one < row1Count; one++)
-            {
-                var row1Possible = _rowPossibilities[0][one];
-                var grid = new List<string[]> { row1Possible.Split(',') };
+            var answer = CheckGrid(new List<string[]>(), 0);
 
-                var answer = CheckGrid(grid, 1);
-
-                if (answer != null)
-                {
-                    return BuildGrid(answer);
-                }
-            }
+            if (answer != null)
+                return BuildGrid(answer);
 
             return null;
         }
