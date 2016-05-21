@@ -9,9 +9,9 @@ namespace Api.Models
 {
     public class Cracker
     {
-        private List<Cell> _grid;
+        private readonly List<Cell> _grid;
         private readonly int[] _range = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-        private Dictionary<int, List<string>> _rowPossibilities = new Dictionary<int, List<string>>();
+        private readonly Dictionary<int, List<string>> _rowPossibilities = new Dictionary<int, List<string>>();
 
         public Cracker(List<ICell> grid)
         {
