@@ -41,50 +41,15 @@ namespace Api.Models
             {
                 var row = this._grid.Where(x => x.Row == i).OrderBy(x => x.Column);
 
-                var possibles = new List<string>();
-
                 // add the possible values from the first cell
-                foreach (var value in row.First().PossibleValues)
-                {
-                    possibles.Add(value.ToString());
-                }
-                
+                var possibles = row.First().PossibleValues.Select(x => x.ToString()).ToList();                               
+
                 // loop through all cells after the first one
-                foreach (var cell in row.Skip(1))
-                {
-                    var tmp = new List<string>();
+                possibles = row.Skip(1)
+                    .Aggregate(possibles, (current, cell) => cell.PossibleValues.SelectMany(x => current.Select(possible => $"{possible},{x}")).ToList());
 
-                    // loop through possible values for the cell
-                    foreach (var value in cell.PossibleValues)
-                    {                        
-
-                        // append each of these cells possible values onto the already possible values
-                        foreach (var possible in possibles)
-                        {
-                            tmp.Add($"{possible},{value}");
-                        }
-                    }
-
-                    // set row possibles to the possibles with this cell
-                    possibles = tmp.Select(x => x).ToList(); // this makes a copy
-                }
-
-                var rowPossibles = new List<string>();
-                // loop through all row possibles
-                foreach (var p in possibles)
-                {
-                    var arr = p.Split(',').ToList();
-
-                    // duplicate numbers in this make this no longer a possibility
-                    if (arr.Distinct().Count() != 9)
-                    {
-                        continue;
-                    }
-
-                    // add distinct possibles
-                    rowPossibles.Add(p);
-                }
-
+                // clean out any rows that have duplicates
+                var rowPossibles = possibles.Where(p => p.Split(',').Distinct().Count() == 9).ToList();
 
                 _rowPossibilities.Add(i, rowPossibles);
             }
