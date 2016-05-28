@@ -8,7 +8,7 @@
     <ProjectGuid>{4387FC19-1E73-46DF-B100-4A1BF302EAFC}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Re</RootNamespace>
+    <RootNamespace>Refs</RootNamespace>
     <AssemblyName>Refs</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <FileAlignment>512</FileAlignment>
@@ -37,6 +37,8 @@
     <!-- A reference to the entire .NET Framework is automatically included -->
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cell.cs" />
+    <Compile Include="Cracker.cs" />
     <Compile Include="ICell.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

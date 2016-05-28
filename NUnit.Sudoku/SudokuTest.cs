@@ -1,41 +1,13 @@
-﻿using Api.Models;
-using NUnit.Framework;
-using refs;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using NUnit.Framework;
+using Refs;
 
 namespace NUnit.Sudoku
 {
     [TestFixture]
     public class SudokuTest
     {
-        [Test]
-        public void EasySudoku()
-        {
-            var easyGrid = GetEasyGrid();
-
-            var cracker = new Cracker(easyGrid);
-            var guess = cracker.Solve();
-
-            Assert.IsTrue(Evaluate(GetEasyGridSolution(), guess));
-
-        }
-
-        [Test]
-        public void HardSudoku()
-        {
-            var hardGrid = GetHardGrid();
-
-            var cracker = new Cracker(hardGrid);
-            var guess = cracker.Solve();
-
-            Assert.IsTrue(Evaluate(GetHardGridSolution(), guess));
-
-        }
-
         private List<ICell> GetEasyGrid()
         {
             var grid = new List<ICell>();
@@ -352,7 +324,7 @@ namespace NUnit.Sudoku
             grid.Add(new Cell(8, 6, 7));
             grid.Add(new Cell(8, 7, 8));
             grid.Add(new Cell(8, 8, 3));
-            
+
             return grid;
         }
 
@@ -368,6 +340,28 @@ namespace NUnit.Sudoku
             }
 
             return true;
+        }
+
+        [Test]
+        public void EasySudoku()
+        {
+            var easyGrid = GetEasyGrid();
+
+            var cracker = new Cracker(easyGrid);
+            var guess = cracker.Solve();
+
+            Assert.IsTrue(Evaluate(GetEasyGridSolution(), guess));
+        }
+
+        [Test]
+        public void HardSudoku()
+        {
+            var hardGrid = GetHardGrid();
+
+            var cracker = new Cracker(hardGrid);
+            var guess = cracker.Solve();
+
+            Assert.IsTrue(Evaluate(GetHardGridSolution(), guess));
         }
     }
 }
