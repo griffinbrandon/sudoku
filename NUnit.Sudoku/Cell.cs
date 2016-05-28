@@ -1,4 +1,4 @@
-﻿using Refs;
+﻿using Sudoku_Cracker;
 
 namespace NUnit.Sudoku
 {

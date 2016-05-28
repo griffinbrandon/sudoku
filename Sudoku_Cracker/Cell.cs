@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Refs
+namespace Sudoku_Cracker
 {
     internal class Cell : ICell
     {

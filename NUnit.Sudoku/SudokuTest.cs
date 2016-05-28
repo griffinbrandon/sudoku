@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
-using Refs;
+using Sudoku_Cracker;
 
 namespace NUnit.Sudoku
 {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Refs
+namespace Sudoku_Cracker
 {
     public class Cracker
     {
@@ -162,10 +162,10 @@ namespace Refs
             // check the columns
             for (var c = 0; c < 9; c++)
             {
-                var column = grid.SelectMany(x => x[c]);
+                var columns = grid.Select(r => r[c]).ToList();
 
                 // if all the values are distinct, the column is good
-                if (column.Distinct().Count() != distinct) return false;
+                if (columns.Distinct().Count() != distinct) return false;
 
             }
 
