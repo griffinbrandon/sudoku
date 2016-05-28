@@ -8,7 +8,7 @@ namespace Sudoku_Cracker
     {
         private readonly List<Cell> _grid;
         private readonly int[] _range = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-        private readonly Dictionary<int, List<string>> _rowPossibilities = new Dictionary<int, List<string>>();
+        private readonly Dictionary<int, List<List<int>>> _rowPossibilities = new Dictionary<int, List<List<int>>>();
 
         public Cracker(List<ICell> grid)
         {
@@ -39,14 +39,39 @@ namespace Sudoku_Cracker
                 var row = this._grid.Where(x => x.Row == i).OrderBy(x => x.Column);
 
                 // add the possible values from the first cell
-                var possibles = row.First().PossibleValues.Select(x => x.ToString()).ToList();                               
+                var possibles = row.First().PossibleValues.Select(x => new List<int> {x}).ToList();
 
-                // loop through all cells after the first one
-                possibles = row.Skip(1)
-                    .Aggregate(possibles, (current, cell) => cell.PossibleValues.SelectMany(x => current.Select(possible => $"{possible},{x}")).ToList());
+                // loop through all cells after the first one and create all of the possible rows                
+                foreach (var cell in row.Skip(1))
+                {
+                    var tmp = new List<List<int>>();
+
+                    foreach (var cellPossible in cell.PossibleValues)
+                    {                        
+                        foreach (var possible in possibles)
+                        {
+                            var p = possible.ToList();
+                            p.Add(cellPossible);
+                            tmp.Add(p);                            
+                        }                        
+                    }
+
+                    possibles = tmp.ToList();
+                }
+
+                //possibles = row.Skip(1)
+                //    .Aggregate(possibles, (current, cell) => cell.PossibleValues.SelectMany(x =>
+                //    {
+                //        return current.Select<List<int>, List<int>>(possible =>
+                //        {
+                //            possible.Add(x);
+                //            return possible;
+                //        });
+
+                //    }).ToList());
 
                 // clean out any rows that have duplicates
-                var rowPossibles = possibles.Where(p => p.Split(',').Distinct().Count() == 9).ToList();
+                var rowPossibles = possibles.Where(x => x.Distinct().Count() == 9).ToList();
 
                 _rowPossibilities.Add(i, rowPossibles);
             }
@@ -80,7 +105,7 @@ namespace Sudoku_Cracker
             }
         }
 
-        private List<string[]> CheckGrid(List<string[]> grid, int nextRowInx)
+        private List<List<int>> CheckGrid(List<List<int>> grid, int nextRowInx)
         {
             var rowCount = _rowPossibilities[nextRowInx].Count;
 
@@ -90,7 +115,7 @@ namespace Sudoku_Cracker
 
                 // add new row to grid passed in
                 var newGrid = grid.ToList();
-                newGrid.Add(rowPossible.Split(','));
+                newGrid.Add(rowPossible);
 
                 // check if columns of grid contain distinct values
                 var isGood = ValidateColumns(newGrid);
@@ -122,7 +147,7 @@ namespace Sudoku_Cracker
         {
             var row1Count = _rowPossibilities[0].Count;
 
-            var answer = CheckGrid(new List<string[]>(), 0);
+            var answer = CheckGrid(new List<List<int>>(), 0);
 
             if (answer != null)
                 return BuildGrid(answer);
@@ -130,7 +155,7 @@ namespace Sudoku_Cracker
             return null;
         }
 
-        private List<ICell> BuildGrid(List<string[]> answer)
+        private List<ICell> BuildGrid(List<List<int>> answer)
         {
             return (GetRow(answer[0], 0)
                 .Union(GetRow(answer[1], 1))
@@ -144,18 +169,18 @@ namespace Sudoku_Cracker
                 .Select(x => (ICell)x).ToList();
         }
 
-        private IEnumerable<Cell> GetRow(string[] rowPossibles, int rowInx)
+        private IEnumerable<Cell> GetRow(List<int> rowPossibles, int rowInx)
         {
             return rowPossibles.Select(x => new Cell
             {
-                Value = int.Parse(x),
+                Value = int.Parse(x.ToString()),
                 Row = rowInx,
-                Column = Array.IndexOf(rowPossibles, x),
-                Box = GetBox(rowInx, Array.IndexOf(rowPossibles, x))
+                Column = rowPossibles.IndexOf(x),
+                Box = GetBox(rowInx, rowPossibles.IndexOf(x))
             });
         }
 
-        private bool ValidateColumns(List<string[]> grid)
+        private bool ValidateColumns(List<List<int>> grid)
         {
             var distinct = grid.Count;
 
@@ -172,17 +197,16 @@ namespace Sudoku_Cracker
             return true;
         }
 
-        private bool ValidateBoxes(List<string[]> grid)
+        private bool ValidateBoxes(List<List<int>> grid)
         {
             // figure out boxes
-            var boxes = new string[] { "", "", "", "", "", "", "", "", "" };
+            var boxes = new List<List<int>> { new List<int>(), new List<int>(), new List<int>(), new List<int>() , new List<int>() , new List<int>() , new List<int>() , new List<int>() , new List<int>() };
             for (var r = 0; r < 9; r++)
             {
                 for (var c = 0; c < 9; c++)
                 {
                     var box = GetBox(r, c);
-                    
-                    boxes[box] += (string.IsNullOrEmpty(boxes[box]) ? grid[r][c] : $",{grid[r][c]}");
+                    boxes[box].Add(grid[r][c]);
                 }
             }
 
@@ -190,7 +214,7 @@ namespace Sudoku_Cracker
             for (var b = 0; b < 9; b++)
             {
                 // if all the values are distinct, the column is good
-                if (boxes[b].Split(',').Distinct().Count() != 9) return false;
+                if (boxes[b].Distinct().Count() != 9) return false;
 
             }
 
