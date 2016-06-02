@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Sudoku_Cracker
@@ -34,9 +35,9 @@ namespace Sudoku_Cracker
         private void DetermineRowPossibilities()
         {
             // loop through each row
-            for (var i = 0; i < 9; i++)
+            for (var r = 0; r < 9; r++)
             {
-                var row = _grid.Where(x => x.Row == i).OrderBy(x => x.Column).ToList();
+                var row = _grid.Where(x => x.Row == r).OrderBy(x => x.Column).ToList();
 
                 // add the possible values from the first cell
                 var possibles = row.First().PossibleValues.Select(x => new [] {x,0,0,0,0,0,0,0,0}).ToList();
@@ -53,7 +54,7 @@ namespace Sudoku_Cracker
                         foreach (var possible in possibles)
                         {
                             // only keep row if the possibility is good
-                            if (Array.IndexOf(possible, cellPossible) < 0)
+                            if (Array.IndexOf(possible, cellPossible) == -1)
                             {
                                 var p = possible.ToArray();
                                 p[c] = cellPossible;
@@ -65,10 +66,7 @@ namespace Sudoku_Cracker
                     possibles = tmp.ToList();
                 }
 
-                // clean out any rows that have duplicates
-                //var rowPossibles = possibles.Where(x => x.Distinct().Count() == 9).ToList();
-
-                _rowPossibilities.Add(i, possibles);
+                _rowPossibilities.Add(r, possibles);
             }
         }
 
@@ -232,7 +230,7 @@ namespace Sudoku_Cracker
         {
             for (var r = 0; r < 9; r++)
             {
-                var rows = _grid.Where(x => x.Row == r);
+                var rows = _grid.Where(x => x.Row == r).ToList();
 
                 for (var c = 0; c < 9; c++)
                 {

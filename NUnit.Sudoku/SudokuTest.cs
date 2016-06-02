@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using NUnit.Framework;
 using Sudoku_Cracker;
+using Stopwatch = NUnit.Framework.Compatibility.Stopwatch;
 
 namespace NUnit.Sudoku
 {
@@ -342,15 +344,13 @@ namespace NUnit.Sudoku
             return true;
         }
 
-        [Test]
-        public void EasySudoku()
+        [SetUp]
+        public void Setup()
         {
+            // this is here to jumpstart things, the times are faster if i run through everything at least once
             var easyGrid = GetEasyGrid();
-
-            var cracker = new Cracker(easyGrid);
-            var guess = cracker.Solve();
-
-            Assert.IsTrue(Evaluate(GetEasyGridSolution(), guess));
+            var cracker = new Cracker(easyGrid);            
+            cracker.Solve();            
         }
 
         [Test]
@@ -358,10 +358,31 @@ namespace NUnit.Sudoku
         {
             var hardGrid = GetHardGrid();
 
-            var cracker = new Cracker(hardGrid);
+            var sw = new Stopwatch();
+            sw.Start();
+            var cracker = new Cracker(hardGrid);            
             var guess = cracker.Solve();
+            sw.Stop();
 
             Assert.IsTrue(Evaluate(GetHardGridSolution(), guess));
+
+            Trace.WriteLine($"hard sudoku solve time: {sw.ElapsedMilliseconds}ms");
+        }
+
+        [Test]
+        public void EasySudoku()
+        {
+            var easyGrid = GetEasyGrid();
+
+            var sw = new Stopwatch();
+            sw.Start();
+            var cracker = new Cracker(easyGrid);
+            var guess = cracker.Solve();
+            sw.Stop();
+
+            Assert.IsTrue(Evaluate(GetEasyGridSolution(), guess));
+
+            Trace.WriteLine($"easy sudoku solve time: {sw.ElapsedMilliseconds}ms");
         }
     }
 }
