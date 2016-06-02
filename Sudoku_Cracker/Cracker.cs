@@ -8,7 +8,7 @@ namespace Sudoku_Cracker
     {
         private readonly List<Cell> _grid;
         private readonly int[] _range = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-        private readonly Dictionary<int, List<List<int>>> _rowPossibilities = new Dictionary<int, List<List<int>>>();
+        private readonly Dictionary<int, List<int[]>> _rowPossibilities = new Dictionary<int, List<int[]>>();
 
         public Cracker(List<ICell> grid)
         {
@@ -36,44 +36,39 @@ namespace Sudoku_Cracker
             // loop through each row
             for (var i = 0; i < 9; i++)
             {
-                var row = _grid.Where(x => x.Row == i).OrderBy(x => x.Column);
+                var row = _grid.Where(x => x.Row == i).OrderBy(x => x.Column).ToList();
 
                 // add the possible values from the first cell
-                var possibles = row.First().PossibleValues.Select(x => new List<int> {x}).ToList();
+                var possibles = row.First().PossibleValues.Select(x => new [] {x,0,0,0,0,0,0,0,0}).ToList();
 
-                // loop through all cells after the first one and create all of the possible rows                
-                foreach (var cell in row.Skip(1))
+                // loop through all cells after the first one and create all of the possible rows 
+                for (var c = 1; c < 9; c++)
                 {
-                    var tmp = new List<List<int>>();
+                    var cell = row[c];
+
+                    var tmp = new List<int[]>();
 
                     foreach (var cellPossible in cell.PossibleValues)
                     {
                         foreach (var possible in possibles)
                         {
-                            var p = possible.ToList();
-                            p.Add(cellPossible);
-                            tmp.Add(p);
+                            // only keep row if the possibility is good
+                            if (Array.IndexOf(possible, cellPossible) < 0)
+                            {
+                                var p = possible.ToArray();
+                                p[c] = cellPossible;
+                                tmp.Add(p);
+                            }
                         }
                     }
 
                     possibles = tmp.ToList();
                 }
 
-                //possibles = row.Skip(1)
-                //    .Aggregate(possibles, (current, cell) => cell.PossibleValues.SelectMany(x =>
-                //    {
-                //        return current.Select<List<int>, List<int>>(possible =>
-                //        {
-                //            possible.Add(x);
-                //            return possible;
-                //        });
-
-                //    }).ToList());
-
                 // clean out any rows that have duplicates
-                var rowPossibles = possibles.Where(x => x.Distinct().Count() == 9).ToList();
+                //var rowPossibles = possibles.Where(x => x.Distinct().Count() == 9).ToList();
 
-                _rowPossibilities.Add(i, rowPossibles);
+                _rowPossibilities.Add(i, possibles);
             }
         }
 
@@ -107,7 +102,7 @@ namespace Sudoku_Cracker
             }
         }
 
-        private List<List<int>> CheckGrid(List<List<int>> grid, int nextRowInx)
+        private List<int[]> CheckGrid(List<int[]> grid, int nextRowInx)
         {
             var rowCount = _rowPossibilities[nextRowInx].Count;
 
@@ -149,7 +144,7 @@ namespace Sudoku_Cracker
         {
             var row1Count = _rowPossibilities[0].Count;
 
-            var answer = CheckGrid(new List<List<int>>(), 0);
+            var answer = CheckGrid(new List<int[]>(), 0);
 
             if (answer != null)
                 return BuildGrid(answer);
@@ -157,7 +152,7 @@ namespace Sudoku_Cracker
             return null;
         }
 
-        private List<ICell> BuildGrid(List<List<int>> answer)
+        private List<ICell> BuildGrid(List<int[]> answer)
         {
             return (GetRow(answer[0], 0)
                 .Union(GetRow(answer[1], 1))
@@ -171,18 +166,18 @@ namespace Sudoku_Cracker
                 .Select(x => (ICell) x).ToList();
         }
 
-        private IEnumerable<Cell> GetRow(List<int> rowPossibles, int rowInx)
+        private IEnumerable<Cell> GetRow(int[] rowPossibles, int rowInx)
         {
             return rowPossibles.Select(x => new Cell
             {
                 Value = int.Parse(x.ToString()),
                 Row = rowInx,
-                Column = rowPossibles.IndexOf(x),
-                Box = GetBox(rowInx, rowPossibles.IndexOf(x))
+                Column = Array.IndexOf(rowPossibles, x),
+                Box = GetBox(rowInx, Array.IndexOf(rowPossibles, x))
             });
         }
 
-        private bool ValidateColumns(List<List<int>> grid)
+        private bool ValidateColumns(List<int[]> grid)
         {
             var distinct = grid.Count;
 
@@ -198,7 +193,7 @@ namespace Sudoku_Cracker
             return true;
         }
 
-        private bool ValidateBoxes(List<List<int>> grid)
+        private bool ValidateBoxes(List<int[]> grid)
         {
             // figure out boxes
             var boxes = new List<List<int>>
