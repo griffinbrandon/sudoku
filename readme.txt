@@ -1,2 +1,1 @@
-# sudoku
 This is a brute force sudoku solver, that can solve a puzzle in under 5ms. (At least on my box) To see the time run the test and check the output.
