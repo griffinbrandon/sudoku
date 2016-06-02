@@ -1,15 +1,24 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
+using NUnit.Framework.Compatibility;
 using Sudoku_Cracker;
-using Stopwatch = NUnit.Framework.Compatibility.Stopwatch;
 
 namespace NUnit.Sudoku
 {
     [TestFixture]
     public class SudokuTest
     {
+        [SetUp]
+        public void Setup()
+        {
+            // this is here to jumpstart things, the times are faster if i run through everything at least once
+            var easyGrid = GetEasyGrid();
+            var cracker = new Cracker(easyGrid);
+            cracker.Solve();
+        }
+
         private List<ICell> GetEasyGrid()
         {
             var grid = new List<ICell>();
@@ -346,31 +355,6 @@ namespace NUnit.Sudoku
 
         public TestContext TestContext { get; set; }
 
-        [SetUp]
-        public void Setup()
-        {
-            // this is here to jumpstart things, the times are faster if i run through everything at least once
-            var easyGrid = GetEasyGrid();
-            var cracker = new Cracker(easyGrid);            
-            cracker.Solve();            
-        }
-
-        [Test]
-        public void HardSudoku()
-        {
-            var hardGrid = GetHardGrid();
-
-            var sw = new Stopwatch();
-            sw.Start();
-            var cracker = new Cracker(hardGrid);            
-            var guess = cracker.Solve();
-            sw.Stop();
-
-            Assert.IsTrue(Evaluate(GetHardGridSolution(), guess));
-
-            TestContext.WriteLine($"hard sudoku solve time: {sw.ElapsedMilliseconds}ms");
-        }
-
         [Test]
         public void EasySudoku()
         {
@@ -385,6 +369,68 @@ namespace NUnit.Sudoku
             Assert.IsTrue(Evaluate(GetEasyGridSolution(), guess));
 
             TestContext.WriteLine($"easy sudoku solve time: {sw.ElapsedMilliseconds}ms");
+        }
+
+        [Test]
+        public void HardSudoku()
+        {
+            var hardGrid = GetHardGrid();
+
+            var sw = new Stopwatch();
+            sw.Start();
+            var cracker = new Cracker(hardGrid);
+            var guess = cracker.Solve();
+            sw.Stop();
+
+            Assert.IsTrue(Evaluate(GetHardGridSolution(), guess));
+
+            TestContext.WriteLine($"hard sudoku solve time: {sw.ElapsedMilliseconds}ms");
+        }
+
+        [Test]
+        public void InvalidColumn()
+        {
+            var easyGrid = GetEasyGrid();
+
+            easyGrid.ForEach(x => x.Column++);
+
+            var cracker = new Cracker(easyGrid);
+            Assert.Throws(typeof (ArgumentOutOfRangeException), () => cracker.Solve());
+        }
+
+        [Test]
+        public void InvalidRow()
+        {
+            var easyGrid = GetEasyGrid();
+
+            easyGrid.ForEach(x => x.Row++);
+
+            var cracker = new Cracker(easyGrid);
+            Assert.Throws(typeof (ArgumentOutOfRangeException), () => cracker.Solve());
+        }
+
+        [Test]
+        public void ZeroInsteadOfNull()
+        {
+            var easyGrid = GetEasyGrid();
+
+            // add a couple of cells with a value of zero
+            easyGrid.Add(new Cell(0, 1, 0));
+
+            var cracker = new Cracker(easyGrid);
+            var guess = cracker.Solve();
+
+            Assert.IsTrue(Evaluate(GetEasyGridSolution(), guess));
+        }
+
+        [Test]
+        public void InvalidValue()
+        {
+            var easyGrid = GetEasyGrid();
+            easyGrid.Take(10).ToList().ForEach(x => x.Value += 10);
+
+            var cracker = new Cracker(easyGrid);
+            Assert.Throws(typeof(ArgumentOutOfRangeException), () => cracker.Solve());
         }
     }
 }

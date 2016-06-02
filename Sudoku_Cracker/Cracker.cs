@@ -18,6 +18,9 @@ namespace Sudoku_Cracker
 
         public List<ICell> Solve()
         {
+            // check for good indexes
+            ValidateGrid();
+            
             // check for invalid values and missing cells
             PrepareCells();
 
@@ -140,8 +143,6 @@ namespace Sudoku_Cracker
 
         private List<ICell> FindSolution()
         {
-            var row1Count = _rowPossibilities[0].Count;
-
             var answer = CheckGrid(new List<int[]>(), 0);
 
             if (answer != null)
@@ -244,13 +245,35 @@ namespace Sudoku_Cracker
                         _grid.Add(cell);
                     }
 
-                    if (cell.Row < 0 || cell.Row > 8 || cell.Column < 0 || cell.Column > 8)
+                    // make sure the value passed in is good
+                    if (cell.Value.HasValue && Array.IndexOf(_range, cell.Value) == -1)
                     {
-                        throw new ArgumentOutOfRangeException($"coordinates {cell.Row}, {cell.Column} are invalid");
+                        if (cell.Value == 0)
+                        {
+                            // account for the one invalid value
+                            cell.Value = null;
+                        }
+                        else
+                        {
+                            throw new ArgumentOutOfRangeException("Value", "invalid values for cell detected, expected values are 1 - 9");
+                        }
                     }
 
                     cell.Box = GetBox(r, c);
                 }
+            }
+        }
+
+        private void ValidateGrid()
+        {
+            if (_grid.Any(x => x.Row > 8 || x.Row < 0))
+            {
+                throw new ArgumentOutOfRangeException("Row","invalid values for row index detected, expected values are 0 - 8");
+            }
+
+            if (_grid.Any(x => x.Column > 8 || x.Column < 0))
+            {
+                throw new ArgumentOutOfRangeException("Column", "invalid values for column index detected, expected values are 0 - 8");
             }
         }
 
