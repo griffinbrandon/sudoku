@@ -344,6 +344,8 @@ namespace NUnit.Sudoku
             return true;
         }
 
+        public TestContext TestContext { get; set; }
+
         [SetUp]
         public void Setup()
         {
@@ -366,7 +368,7 @@ namespace NUnit.Sudoku
 
             Assert.IsTrue(Evaluate(GetHardGridSolution(), guess));
 
-            Trace.WriteLine($"hard sudoku solve time: {sw.ElapsedMilliseconds}ms");
+            TestContext.WriteLine($"hard sudoku solve time: {sw.ElapsedMilliseconds}ms");
         }
 
         [Test]
@@ -382,7 +384,7 @@ namespace NUnit.Sudoku
 
             Assert.IsTrue(Evaluate(GetEasyGridSolution(), guess));
 
-            Trace.WriteLine($"easy sudoku solve time: {sw.ElapsedMilliseconds}ms");
+            TestContext.WriteLine($"easy sudoku solve time: {sw.ElapsedMilliseconds}ms");
         }
     }
 }
