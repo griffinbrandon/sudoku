@@ -210,13 +210,17 @@ namespace SudokuCracker
 
         private IEnumerable<Cell> GetRow(int[] rowPossibles, int rowInx)
         {
-            return rowPossibles.Select(x => new Cell
+            var row = new List<Cell>();
+
+            for (var c = 0; c < 9; c++)
             {
-                Value = int.Parse(x.ToString()),
-                Row = rowInx,
-                Column = Array.IndexOf(rowPossibles, x),
-                Box = GetBox(rowInx, Array.IndexOf(rowPossibles, x))
-            });
+                row.Add(new Cell(rowInx, c, rowPossibles[c])
+                {
+                    Box = GetBox(rowInx, c)
+                });
+            }
+
+            return row;
         }
 
         private bool ValidateColumns(List<int[]> grid)
