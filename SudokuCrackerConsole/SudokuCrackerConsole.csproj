@@ -51,15 +51,15 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Sudoku_Cracker\Sudoku_Cracker.csproj">
-      <Project>{4387fc19-1e73-46df-b100-4a1bf302eafc}</Project>
-      <Name>Sudoku_Cracker</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="sample.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SudokuCracker\SudokuCracker.csproj">
+      <Project>{4387fc19-1e73-46df-b100-4a1bf302eafc}</Project>
+      <Name>SudokuCracker</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

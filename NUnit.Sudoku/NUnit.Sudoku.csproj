@@ -49,9 +49,9 @@
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Sudoku_Cracker\Sudoku_Cracker.csproj">
-      <Project>{4387FC19-1E73-46DF-B100-4A1BF302EAFC}</Project>
-      <Name>Sudoku_Cracker</Name>
+    <ProjectReference Include="..\SudokuCracker\SudokuCracker.csproj">
+      <Project>{4387fc19-1e73-46df-b100-4a1bf302eafc}</Project>
+      <Name>SudokuCracker</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

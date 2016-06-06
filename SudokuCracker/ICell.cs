@@ -1,4 +1,4 @@
-﻿namespace Sudoku_Cracker
+﻿namespace SudokuCracker
 {
     public interface ICell
     {

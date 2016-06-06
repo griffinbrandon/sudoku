@@ -1,6 +1,7 @@
-﻿namespace SudokuCrackerConsole
+﻿using SudokuCracker;
+
+namespace SudokuCrackerConsole
 {
-    using Sudoku_Cracker;
     using System;
     using System.Collections.Generic;
     using System.IO;

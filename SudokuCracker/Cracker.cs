@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
-namespace Sudoku_Cracker
+namespace SudokuCracker
 {
     public class Cracker
     {
