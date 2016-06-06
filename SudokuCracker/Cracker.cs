@@ -12,7 +12,11 @@ namespace SudokuCracker
 
         public Cracker(List<ICell> grid)
         {
-            _grid = grid.Select(x => new Cell(x.Row, x.Column, x.Value)).ToList();
+            _grid = new List<Cell>(grid.Count);
+            foreach (var cell in grid)
+            {
+                _grid.Add(new Cell(cell.Row, cell.Column, cell.Value));
+            }
         }
 
         public List<ICell> Solve()
@@ -82,25 +86,67 @@ namespace SudokuCracker
                     continue;
                 }
 
+                var usedValues = new List<int>();
+
                 // get values from cells in same row
-                var inRow = _grid.Where(x => x.Row == cell.Row && x.Column != cell.Column).Select(x => x.Value);
+                usedValues.AddRange(GetUsedValuesForRow(cell.Row, cell.Column));
 
                 // get values from cells in same column
-                var inCol = _grid.Where(x => x.Column == cell.Column && x.Row != cell.Row).Select(x => x.Value);
+                usedValues.AddRange(GetUsedValuesForColumn(cell.Column, cell.Row));
 
                 // get values from cells in same box
-                var inBox =
-                    _grid.Where(x => x.Box == cell.Box && x.Row != cell.Row && x.Column != cell.Column)
-                        .Select(x => x.Value);
-
-                // get a distinct list of numbers that are already used
-                var reservedValues = (inRow.Union(inCol).Union(inBox)).Distinct();
-
+                usedValues.AddRange(GetUsedValuesForBox(cell.Box, cell.Row, cell.Column));
+                
                 // using the distinct list, get values this cell could be
-                var possibles = _range.Where(x => !reservedValues.Contains(x)).ToList();
+                var possibles = _range.Where(x => !usedValues.Contains(x)).ToList();
                 cell.PossibleValues = possibles;
             }
         }
+
+        private List<int> GetUsedValuesForRow(int row, int excludeColumn)
+        {
+            var usedValues = new List<int>();
+             
+            foreach (var cell in _grid)
+            {
+                if (cell.Value.HasValue && cell.Value > 0 && cell.Row == row && cell.Column != excludeColumn)
+                {
+                    usedValues.Add(cell.Value.Value);
+                }
+            }
+
+            return usedValues;
+        }
+
+        private List<int> GetUsedValuesForColumn(int column, int excludeRow)
+        {
+            var usedValues = new List<int>();
+
+            foreach (var cell in _grid)
+            {
+                if (cell.Value.HasValue && cell.Value > 0 && cell.Column == column && cell.Row != excludeRow)
+                {
+                    usedValues.Add(cell.Value.Value);
+                }
+            }
+
+            return usedValues;
+        }
+
+        private List<int> GetUsedValuesForBox(int box, int excludeRow, int excludeColumn)
+        {
+            var usedValues = new List<int>();
+
+            foreach (var cell in _grid)
+            {
+                if (cell.Value.HasValue && cell.Value > 0 && cell.Box == box && cell.Row != excludeRow && cell.Column != excludeColumn)
+                {
+                    usedValues.Add(cell.Value.Value);
+                }
+            }
+
+            return usedValues;
+        } 
 
         private List<int[]> CheckGrid(List<int[]> grid, int nextRowInx)
         {
@@ -152,16 +198,14 @@ namespace SudokuCracker
 
         private List<ICell> BuildGrid(List<int[]> answer)
         {
-            return (GetRow(answer[0], 0)
-                .Union(GetRow(answer[1], 1))
-                .Union(GetRow(answer[2], 2))
-                .Union(GetRow(answer[3], 3))
-                .Union(GetRow(answer[4], 4))
-                .Union(GetRow(answer[5], 5))
-                .Union(GetRow(answer[6], 6))
-                .Union(GetRow(answer[7], 7))
-                .Union(GetRow(answer[8], 8)))
-                .Select(x => (ICell) x).ToList();
+            var solution = new List<ICell>();
+
+            for (var i = 0; i < 9; i++)
+            {
+                solution.AddRange(GetRow(answer[i], i));
+            }
+
+            return solution;
         }
 
         private IEnumerable<Cell> GetRow(int[] rowPossibles, int rowInx)

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using NUnit.Framework;
-using NUnit.Framework.Compatibility;
 using SudokuCracker;
 
 namespace NUnit.Sudoku
@@ -353,8 +353,6 @@ namespace NUnit.Sudoku
             return true;
         }
 
-        public TestContext TestContext { get; set; }
-
         [Test]
         public void EasySudoku()
         {
@@ -368,7 +366,7 @@ namespace NUnit.Sudoku
 
             Assert.IsTrue(Evaluate(GetEasyGridSolution(), guess));
 
-            TestContext.WriteLine($"easy sudoku solve time: {sw.ElapsedMilliseconds}ms");
+            Trace.WriteLine($"easy sudoku solve time: {sw.ElapsedMilliseconds}ms");
         }
 
         [Test]
@@ -384,7 +382,7 @@ namespace NUnit.Sudoku
 
             Assert.IsTrue(Evaluate(GetHardGridSolution(), guess));
 
-            TestContext.WriteLine($"hard sudoku solve time: {sw.ElapsedMilliseconds}ms");
+            Trace.WriteLine($"hard sudoku solve time: {sw.ElapsedMilliseconds}ms");
         }
 
         [Test]
