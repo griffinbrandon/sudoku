@@ -43,15 +43,17 @@ namespace SudokuCracker
             // loop through each row
             for (var r = 0; r < 9; r++)
             {
-                var row = _grid.Where(x => x.Row == r).OrderBy(x => x.Column).ToList();
+                // order the row by the column
+                var rowCells = GetCellsForRow(r).OrderBy(x => x.Column).ToList();
 
-                // add the possible values from the first cell
-                var possibles = row.First().PossibleValues.Select(x => new [] {x,0,0,0,0,0,0,0,0}).ToList();
+                // create array of int for all possible values of the first cell in this row
+                var firstCell = rowCells.First();
+                var possibles = firstCell.PossibleValues.Select(x => new [] {x,0,0,0,0,0,0,0,0}).ToList();
 
                 // loop through all cells after the first one and create all of the possible rows 
                 for (var c = 1; c < 9; c++)
                 {
-                    var cell = row[c];
+                    var cell = rowCells[c];
 
                     var tmp = new List<int[]>();
 
@@ -86,30 +88,68 @@ namespace SudokuCracker
                     continue;
                 }
 
-                var usedValues = new List<int>();
+                var usedValues = new List<int>();                
 
                 // get values from cells in same row
-                usedValues.AddRange(GetUsedValuesForRow(cell.Row, cell.Column));
+                var valuesFromRow = GetUsedValuesForRow(cell.Row, cell.Column);
+                AddPossibleValuesFromList(usedValues, valuesFromRow);
 
                 // get values from cells in same column
-                usedValues.AddRange(GetUsedValuesForColumn(cell.Column, cell.Row));
+                var valuesFromColumn = GetUsedValuesForColumn(cell.Column, cell.Row);
+                AddPossibleValuesFromList(usedValues, valuesFromColumn);
 
-                // get values from cells in same box
-                usedValues.AddRange(GetUsedValuesForBox(cell.Box, cell.Row, cell.Column));
+                // get values from cells in same box              
+                var valuesFromBox = GetUsedValuesForBox(cell.Box, cell.Row, cell.Column);
+                AddPossibleValuesFromList(usedValues, valuesFromBox);
+
+                // using list of values already taken, determine possible values for this cell
+                var possibles = new List<int>();
+                foreach (var value in _range)
+                {
+                    if (!usedValues.Contains(value))
+                    {
+                        possibles.Add(value);
+                    }  
+                }
                 
-                // using the distinct list, get values this cell could be
-                var possibles = _range.Where(x => !usedValues.Contains(x)).ToList();
                 cell.PossibleValues = possibles;
             }
         }
 
+        private void AddPossibleValuesFromList(List<int> allUsedValues, List<int> cellValuesFromOrdinal)
+        {
+            foreach (var value in cellValuesFromOrdinal)
+            {
+                if (!allUsedValues.Contains(value))
+                {
+                    allUsedValues.Add(value);   
+                }                
+            }
+        }
+
+        private List<Cell> GetCellsForRow(int rowInx)
+        {
+            var row = new List<Cell>();
+
+            foreach (var cell in _grid)
+            {
+                if (cell.Row == rowInx)
+                {
+                    row.Add(cell);
+                }    
+            }
+
+            return row;
+        } 
+
         private List<int> GetUsedValuesForRow(int row, int excludeColumn)
         {
             var usedValues = new List<int>();
+            var rowCells = GetCellsForRow(row);
              
-            foreach (var cell in _grid)
+            foreach (var cell in rowCells)
             {
-                if (cell.Value.HasValue && cell.Value > 0 && cell.Row == row && cell.Column != excludeColumn)
+                if (cell.Value.HasValue && cell.Value > 0 && cell.Column != excludeColumn)
                 {
                     usedValues.Add(cell.Value.Value);
                 }
@@ -225,15 +265,24 @@ namespace SudokuCracker
 
         private bool ValidateColumns(List<int[]> grid)
         {
+            // the number of items is also the number of items in each column
             var distinct = grid.Count;
 
-            // check the columns
+            // check each column in the row
             for (var c = 0; c < 9; c++)
             {
-                var columns = grid.Select(r => r[c]).ToList();
-
-                // if all the values are distinct, the column is good
-                if (columns.Distinct().Count() != distinct) return false;
+                var columns = new List<int>();
+                foreach (var r in grid)
+                {
+                    if (columns.Contains(r[c]))
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        columns.Add(r[c]);
+                    }
+                }
             }
 
             return true;
@@ -259,15 +308,15 @@ namespace SudokuCracker
                 for (var c = 0; c < 9; c++)
                 {
                     var box = GetBox(r, c);
-                    boxes[box].Add(grid[r][c]);
+                    if (boxes[box].Contains(grid[r][c]))
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        boxes[box].Add(grid[r][c]);
+                    }
                 }
-            }
-
-            // check the boxes
-            for (var b = 0; b < 9; b++)
-            {
-                // if all the values are distinct, the column is good
-                if (boxes[b].Distinct().Count() != 9) return false;
             }
 
             // this is the answer
