@@ -339,6 +339,52 @@ namespace NUnit.Sudoku
             return grid;
         }
 
+        private List<ICell> GetSuperHardGrid()
+        {
+            var grid = new List<ICell>();
+
+            // row 1
+            grid.Add(new Cell(0,0,8));
+
+            // row 2
+            grid.Add(new Cell(1, 2, 3));
+            grid.Add(new Cell(1, 3, 6));
+
+            // row 3
+            grid.Add(new Cell(2, 1, 7));
+            grid.Add(new Cell(1, 4, 9));
+            grid.Add(new Cell(2, 6, 2));
+
+            // row 4
+            grid.Add(new Cell(3, 1, 5));
+            grid.Add(new Cell(3, 5, 7));
+
+            // row 5
+            grid.Add(new Cell(4, 4, 4));
+            grid.Add(new Cell(4, 5, 5));
+            grid.Add(new Cell(4, 6, 7));
+
+            // row 6
+            grid.Add(new Cell(5, 3, 1));
+            grid.Add(new Cell(5, 7, 3));
+
+            // row 7
+            grid.Add(new Cell(6, 2, 1));
+            grid.Add(new Cell(6, 7, 6));
+            grid.Add(new Cell(6, 8, 8));
+
+            // row 8
+            grid.Add(new Cell(7, 2, 8));
+            grid.Add(new Cell(7, 3, 5));
+            grid.Add(new Cell(7, 7, 1));
+
+            // row 9
+            grid.Add(new Cell(8, 1, 9));
+            grid.Add(new Cell(8, 6, 4));
+
+            return grid;
+        } 
+
         private bool Evaluate(List<ICell> solution, List<ICell> guess)
         {
             foreach (var guessCell in guess)
@@ -383,6 +429,20 @@ namespace NUnit.Sudoku
             Assert.IsTrue(Evaluate(GetHardGridSolution(), guess));
 
             Trace.WriteLine($"hard sudoku solve time: {sw.ElapsedMilliseconds}ms");
+        }
+
+        [Test]
+        public void HardestSudoku()
+        {
+            var hardest = GetSuperHardGrid();
+
+            var sw = new Stopwatch();
+            sw.Start();
+            var cracker = new Cracker(hardest);
+            var guess = cracker.Solve();
+            sw.Stop();
+
+            Trace.WriteLine($"hardest in world solve time: {sw.ElapsedMilliseconds}");
         }
 
         [Test]
