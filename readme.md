@@ -11,4 +11,4 @@ The indexes for the cells you pass in are zero-based and should look something l
 ```
 var cell = new Cell(0, 0, 1);
 ```
-This represents a the top most left cell in a grid. The value in this grid is one.
+This represents the top most left cell in a grid. The value in this grid is one.
