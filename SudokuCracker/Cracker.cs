@@ -265,9 +265,6 @@ namespace SudokuCracker
 
         private bool ValidateColumns(List<int[]> grid)
         {
-            // the number of items is also the number of items in each column
-            var distinct = grid.Count;
-
             // check each column in the row
             for (var c = 0; c < 9; c++)
             {
